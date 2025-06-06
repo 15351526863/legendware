@@ -4,6 +4,7 @@
 #include "menu.h"
 #include "..\hooks\hooks.h"
 #include "..\config\config.h"
+#include "..\utils\input_manager.h"
 
 #include "..\ImGui Render\ImGUI_Renderer.h"
 #include "..\features\features.h"
@@ -150,21 +151,24 @@ static void initialize_textures(
 
 void Menu::initialize()
 {
-	while (true)
-	{
-		window = FindWindow(crypt_str("Valve001"), nullptr);
+        while (true)
+        {
+                window = FindWindow(crypt_str("Valve001"), nullptr);
 
-		if (window)
-			break;
-	}
+                if (window)
+                        break;
+        }
 
-	while (true)
-	{
-		old_window = (HWND)SetWindowLongPtr(window, GWL_WNDPROC, (LONG_PTR)hooked_wndproc); //-V107 //-V221
+        InitializeInputSystem();
 
-		if (old_window)
-			break;
-	}
+        while (true)
+        {
+                old_window = (HWND)SetWindowLongPtr(window, GWL_WNDPROC, (LONG_PTR)Hooked_WndProc); //-V107 //-V221
+                original_wndproc = (WNDPROC)old_window;
+
+                if (old_window)
+                        break;
+        }
 }
 
 void Menu::initialize_gui(crypt_ptr <IDirect3DDevice9> device)
@@ -1832,7 +1836,7 @@ void Menu::draw()
 
 void Menu::release()
 {
-	SetWindowLongPtr(FindWindow(crypt_str("Valve001"), nullptr), GWL_WNDPROC, (LONG)old_window);
+        SetWindowLongPtr(FindWindow(crypt_str("Valve001"), nullptr), GWL_WNDPROC, (LONG)original_wndproc);
 
 	ImGui_ImplDX9_Shutdown();
 	ImGui_ImplWin32_Shutdown();

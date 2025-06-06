@@ -132,7 +132,8 @@ using ProcessInterpolatedList = int(*)(void);
 int hooked_processinterpolatedlist();
 
 void hooked_sequenceproxy(RecvProxyData& data, void* arg2, void* arg3);
-LRESULT __stdcall hooked_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
+LRESULT __stdcall Hooked_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern WNDPROC original_wndproc;
 
 using EquipItemInLoadout = bool(__thiscall*)(PVOID, int, int, uint64_t, bool);
 using DrawModel = void(__thiscall*)(IStudioRender*, DrawModelResults_t*, const DrawModelInfo_t&, matrix3x4_t*, float*, float*, const Vector&, int);
