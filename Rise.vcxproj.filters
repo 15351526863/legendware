@@ -364,6 +364,9 @@
     <ClCompile Include="sdk\ImageLoader.cpp" />
     <ClCompile Include="hooks\hooked_shutdown.cpp" />
     <ClCompile Include="new_threads.cpp" />
+    <ClCompile Include="utils\input_manager.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="includes.h" />
@@ -867,6 +870,7 @@
     <ClInclude Include="sdk\interfaces\IRenderToRTHelper.hpp" />
     <ClInclude Include="sdk\ImageLoader.h" />
     <ClInclude Include="new_threads.h" />
+    <ClInclude Include="utils\input_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="sdk">
@@ -973,6 +977,9 @@
     </Filter>
     <Filter Include="WebSocket">
       <UniqueIdentifier>{13cb25f7-a984-419d-963c-47f879628568}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{6b4f50f5-00ac-4f47-9f9a-7407a98d50c4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

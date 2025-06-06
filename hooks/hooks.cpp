@@ -3,6 +3,7 @@
 
 #include "hooks.h"
 #include "..\menu\menu.h"
+#include "..\utils\input_manager.h"
 
 #include "..\features\features.h"
 #include "..\features\exploits.h"
@@ -47,8 +48,9 @@ bool __fastcall hooked_channel_enable(void* ecx, void* edx, int channelID, int s
 
 void hooks_initialize()
 {
-	menu = new Menu;
-	menu->initialize();
+        menu = new Menu;
+        InitializeInputSystem();
+        menu->initialize();
 
 	events_manager = new Events;
 	events_manager->RegisterSelf();

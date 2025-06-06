@@ -3,78 +3,45 @@
 
 #include "hooks.h"
 #include "..\menu\menu.h"
-#include "../gui/core/imgui_ex/lua_editor.h"
+#include "../utils/input_manager.h"
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-LRESULT __stdcall hooked_wndproc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-    if (!engine->IsActiveApp())
-        return CallWindowProc((WNDPROC)menu->old_window, hwnd, msg, wparam, lparam);
+static std::unordered_map<int, bool> key_states;
+static std::unordered_map<int, bool> key_pressed;
+WNDPROC original_wndproc = nullptr;
 
-    static auto holding = false;
-
-    if (!holding && msg == WM_KEYDOWN && (wparam == VK_INSERT || wparam == VK_DELETE))
-    {
-        holding = true;
-        core::s::is_opened = !core::s::is_opened;
-
-        if (core::s::is_opened && ctx->local()->valid() && ctx->weapon_config != WEAPON_CONFIG_INVALID && ctx->weapon_config != WEAPON_CONFIG_TASER && ctx->weapon_config != WEAPON_CONFIG_KNIFE)
-        {
-            legit_wconfig = ctx->weapon_config;
-            weapon_config = ctx->weapon_config;
+LRESULT __stdcall Hooked_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    // Handle key messages first, before GUI
+    switch (uMsg) {
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+            if (wParam < 256) {
+                bool was_down = key_states[wParam];
+                key_states[wParam] = true;
+                key_pressed[wParam] = !was_down; // True only on first press
+                
+                // Process key bindings BEFORE GUI
+                ProcessKeyBindings(wParam, true);
+            }
+            break;
+            
+        case WM_KEYUP:
+        case WM_SYSKEYUP:
+            if (wParam < 256) {
+                key_states[wParam] = false;
+                key_pressed[wParam] = false;
+                ProcessKeyBindings(wParam, false);
+            }
+            break;
+    }
+    
+    // Only handle GUI input if menu is open AND key isn't bound to a function
+    if (menu_open && !IsKeyBound(wParam)) {
+        if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam)) {
+            return true;
         }
     }
-    else if (holding && msg == WM_KEYUP && (wparam == VK_INSERT || wparam == VK_DELETE))
-        holding = false;
-
- 
-    if (core::s::is_opened)
-    {
-        auto skip = false;
-        auto key = KEY_NONE;
-
-        if (msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP)
-            key = MOUSE_LEFT;
-
-        if (key != KEY_NONE)
-        {
-            for (auto& item : config->items)
-            {
-                if (item.second.type == ITEM_KEY_BIND)
-                {
-                    auto key_bind = crypt_ptr <KeyBind> ((KeyBind*)item.second.pointer.get());
-
-                    if (key_bind->mode == HOLD && key_bind->state && key_bind->key == key)
-                        skip = true;
-                }
-            }
-        }
-
-        if (!skip)
-        {
-            if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam))
-                return true;
-
-            ImGuiContext* g = GImGui;
-            if (g && g->IO.WantTextInput) {
-                inputsystem->ResetInputState();
-                return true;
-            }
-  
-           /* if (lua_editor.is_open()) {
-                inputsystem->ResetInputState();
-                return true;
-            }*/
-            auto pressed_buttons = msg == WM_LBUTTONDOWN || msg == WM_LBUTTONUP || msg == WM_MOUSEMOVE || msg == WM_MOUSEWHEEL;
-
-            if (pressed_buttons)
-                return false;
-        }
-
-        if (msg == WM_LBUTTONDBLCLK)
-            return false;
-    }
-
-    return CallWindowProc((WNDPROC)menu->old_window, hwnd, msg, wparam, lparam);
+    
+    return CallWindowProc(original_wndproc, hWnd, uMsg, wParam, lParam);
 }

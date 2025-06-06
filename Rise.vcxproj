@@ -131,6 +131,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="menu\menu.cpp" />
     <ClCompile Include="new_threads.cpp" />
+    <ClCompile Include="utils\input_manager.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="resource_manager.cpp" />
     <ClCompile Include="sdk\classes.cpp" />
@@ -262,6 +263,7 @@
     <ClInclude Include="Lua\sol.hpp" />
     <ClInclude Include="menu\menu.h" />
     <ClInclude Include="new_threads.h" />
+    <ClInclude Include="utils\input_manager.h" />
     <ClInclude Include="protect\crypt_bytes.h" />
     <ClInclude Include="protect\crypt_call.h" />
     <ClInclude Include="protect\crypt_hash.h" />
